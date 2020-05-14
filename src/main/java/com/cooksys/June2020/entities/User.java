@@ -3,14 +3,7 @@ package com.cooksys.June2020.entities;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -52,7 +45,6 @@ public class User {
 	@OneToMany(mappedBy = "author")
 	private List<Tweet> tweets;
 
-	@ManyToMany(mappedBy = "user")
-	private List<Tweet> mentions;
-
+	@OneToMany
+	private List<User> followers;
 }
