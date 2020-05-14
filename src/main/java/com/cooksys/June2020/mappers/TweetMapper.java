@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.mapstruct.Mapper;
 
+import com.cooksys.June2020.dtos.TweetRequestDto;
+import com.cooksys.June2020.dtos.TweetResponseDto;
 import com.cooksys.June2020.entities.Tweet;
 
 @Mapper(componentModel = "spring")
