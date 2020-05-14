@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="tweets")
+@Table(name = "tweets")
 @NoArgsConstructor
 @Getter
 @Setter
@@ -34,27 +34,27 @@ public class Tweet {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Integer id;
+	private Long id;
 
 	@Column(nullable = false)
 	private Boolean isDeleted;
-	
+
 	@CreationTimestamp
 	@Column(name = "posted_at")
 	private Timestamp posted;
-	
-	@Column(nullable=false)
+
+	@Column(nullable = false)
 	private User author;
 
 	@Column
 	private String content;
 
-	@Column
+	@OneToMany
 	private List<User> mentions;
-	
-	@Column
-	private List<Tweet> likes;
-	
+
+	@OneToMany
+	private List<User> likes;
+
 	@OneToMany(mappedBy = "tweet")
 	private List<Tweet> inReplyTos;
 
@@ -70,10 +70,6 @@ public class Tweet {
 	private Tweet repostOf;
 
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinTable(
-			name="tweet_hashtags",
-			joinColumns = @JoinColumn(name = "tweet_id") ,
-			inverseJoinColumns = @JoinColumn(name = "tag_id"))
 	private List<HashTag> hashtags;
 
 }
