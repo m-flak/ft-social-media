@@ -15,6 +15,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -23,6 +26,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name="tweets")
 @NoArgsConstructor
 @Getter
 @Setter
@@ -36,16 +40,17 @@ public class Tweet {
 	private Boolean isDeleted;
 	
 	@CreationTimestamp
+	@Column(name = "posted_at")
 	private Timestamp posted;
-
-//	@Column(nullable=false)
-//	private User author;
+	
+	@Column(nullable=false)
+	private User author;
 
 	@Column
 	private String content;
 
 	@Column
-	private List<Tweet> mentions;
+	private List<User> mentions;
 	
 	@Column
 	private List<Tweet> likes;
@@ -64,11 +69,11 @@ public class Tweet {
 	@JoinColumn(name = "tweet_id")
 	private Tweet repostOf;
 
-	@ManyToMany(cascade = CascadeType.ALL, mappedBy = "hashtags")
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(
-			name="tweet_hashtag",
-			joinColumns = @JoinColumn(name="tweet_id"),
-			inverseJoinColumns = @JoinColumn(name="hashtag_id"))
+			name="tweet_hashtags",
+			joinColumns = @JoinColumn(name = "tweet_id") ,
+			inverseJoinColumns = @JoinColumn(name = "tag_id"))
 	private List<HashTag> hashtags;
 
 }
