@@ -19,6 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Getter;
@@ -37,36 +38,36 @@ public class Tweet {
 	private Long id;
 
 	@Column(nullable = false)
-	private Boolean isDeleted;
+	private Boolean isDeleted = false;
 
 	@CreationTimestamp
 	@Column(name = "posted_at")
 	private Timestamp posted;
 
-	@Column(nullable = false)
+	@ManyToOne
 	private User author;
 
 	@Column
 	private String content;
 
-	@OneToMany
+	@ManyToMany
 	private List<User> mentions;
 
-	@OneToMany
+	@ManyToMany
 	private List<User> likes;
 
-	@OneToMany(mappedBy = "tweet")
+	@OneToMany(mappedBy = "inReplyTo")
 	private List<Tweet> inReplyTos;
 
-	@OneToMany(mappedBy = "tweet")
+	@OneToMany(mappedBy = "repostOf")
 	private List<Tweet> repostOfs;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tweet_id")
+	@JoinColumn(name = "reply_id")
 	private Tweet inReplyTo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tweet_id")
+	@JoinColumn(name = "repost_id")
 	private Tweet repostOf;
 
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
