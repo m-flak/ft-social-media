@@ -1,17 +1,22 @@
 package com.cooksys.June2020.mappers;
 
-import com.cooksys.June2020.dtos.HashTagDto;
-import com.cooksys.June2020.entities.HashTag;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 
-import java.util.List;
+import com.cooksys.June2020.dtos.HashTagDto;
+import com.cooksys.June2020.entities.HashTag;
+import com.cooksys.June2020.entities.Tweet;
 
 @Mapper(componentModel = "spring")
 public interface HashTagMapper {
-    HashTagDto entityToDto(HashTag entity);
+	HashTagDto entityToDto(HashTag entity);
 
-    List<HashTagDto> entitiesToDtos(List<HashTag> entities);
-    List<HashTag> dtosToEntities(List<HashTag> dtos);
+	List<Tweet> entityToDto(List<Tweet> tweets);
 
-    HashTag dtoToEntity(HashTagDto dto);
+	List<HashTagDto> entitiesToDtos(List<HashTag> entities);
+
+	List<HashTag> dtosToEntities(List<HashTag> dtos);
+
+	HashTag dtoToEntity(HashTagDto dto);
 }

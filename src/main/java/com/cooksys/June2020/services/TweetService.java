@@ -1,5 +1,15 @@
 package com.cooksys.June2020.services;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.cooksys.June2020.dtos.TweetRequestDto;
 import com.cooksys.June2020.dtos.TweetResponseDto;
 import com.cooksys.June2020.entities.HashTag;
@@ -10,36 +20,26 @@ import com.cooksys.June2020.mappers.TweetMapper;
 import com.cooksys.June2020.repositories.HashtagRepository;
 import com.cooksys.June2020.repositories.TweetRepository;
 import com.cooksys.June2020.repositories.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class TweetService {
 	private HashtagRepository hashtagRepository;
-    private UserRepository userRepository;
-    private TweetRepository tweetRepository;
-    private TweetMapper tweetMapper;
+	private UserRepository userRepository;
+	private TweetRepository tweetRepository;
+	private TweetMapper tweetMapper;
 
-    public TweetService(UserRepository userRepository, TweetRepository tweetRepository, TweetMapper tweetMapper,
-						HashtagRepository hashtagRepository) {
-        this.userRepository = userRepository;
-        this.tweetRepository = tweetRepository;
-        this.tweetMapper = tweetMapper;
-        this.hashtagRepository = hashtagRepository;
-    }
+	public TweetService(UserRepository userRepository, TweetRepository tweetRepository, TweetMapper tweetMapper,
+			HashtagRepository hashtagRepository) {
+		this.userRepository = userRepository;
+		this.tweetRepository = tweetRepository;
+		this.tweetMapper = tweetMapper;
+		this.hashtagRepository = hashtagRepository;
+	}
 
-    public ResponseEntity<TweetResponseDto> postNewTweet(TweetRequestDto tweetRequest) {
-    	// Validate credentials
+	public ResponseEntity<TweetResponseDto> postNewTweet(TweetRequestDto tweetRequest) {
+		// Validate credentials
 		Optional<User> authoringUser = userRepository.findByCredentialsUsernameAndCredentialsPassword(
-				tweetRequest.getCredentials().getUsername(),
-				tweetRequest.getCredentials().getPassword()
-		);
+				tweetRequest.getCredentials().getUsername(), tweetRequest.getCredentials().getPassword());
 
 		// User Credentials are bogus, abort!
 		if (!authoringUser.isPresent()) {
@@ -47,8 +47,8 @@ public class TweetService {
 		}
 
 		// Create regex to pilfer the tweet's body.
-		Matcher likeMentionMatcher =
-				Pattern.compile("([#|@]\\w+)", Pattern.MULTILINE).matcher(tweetRequest.getContent());
+		Matcher likeMentionMatcher = Pattern.compile("([#|@]\\w+)", Pattern.MULTILINE)
+				.matcher(tweetRequest.getContent());
 
 		// Found (if any) mentioned users and/or hashtags
 		ArrayList<User> mentionedUsers = new ArrayList<>();
@@ -66,8 +66,7 @@ public class TweetService {
 					Optional<User> mentionedUser = userRepository.findByCredentialsUsername(match.substring(1));
 					// Add a user to be mentioned, if they exist.
 					mentionedUser.ifPresent(mentionedUsers::add);
-				}
-				else if (match.startsWith("#")) {
+				} else if (match.startsWith("#")) {
 					// lowercase label, so #TaG is still #tag
 					String label = match.substring(1).toLowerCase();
 					Optional<HashTag> referencedHashTag = hashtagRepository.findByLabel(label);
@@ -75,8 +74,7 @@ public class TweetService {
 					if (referencedHashTag.isPresent()) {
 						// existing hashtag
 						hashTags.add(referencedHashTag.get());
-					}
-					else {
+					} else {
 						// new hashtag
 						HashTag newHashTag = new HashTag();
 						newHashTag.setLabel(label);
@@ -97,4 +95,36 @@ public class TweetService {
 
 		return new ResponseEntity<>(tweetMapper.entityToDto(tweetRepository.saveAndFlush(tweetToPost)), HttpStatus.OK);
 	}
+
+	public List<TweetResponseDto> getTweets() {
+		return tweetMapper.entitiesToDtos(tweetRepository.findAllAndNotIsDeleted());
+	}
+
+	public ResponseEntity<TweetResponseDto> deleteTweetById(Integer id) {
+		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
+		// Validate credentials
+		Optional<User> authoringUser = userRepository.findByCredentialsUsernameAndCredentialsPassword(
+				optionalTweet.get().getAuthor().getCredentials().getUsername(),
+				optionalTweet.get().getAuthor().getCredentials().getPassword());
+
+		// User Credentials are bogus, abort!
+		if (!authoringUser.isPresent()) {
+			throw new InvalidUserCredentialsException("Invalid Username/Password combination supplied.");
+		}
+		if (optionalTweet.isEmpty()) {
+			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
+		}
+		Tweet tweetToDelete = optionalTweet.get();
+		tweetToDelete.setIsDeleted(true);
+		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(tweetToDelete), HttpStatus.OK);
+	}
+
+	public ResponseEntity<TweetResponseDto> getTweetById(Integer id) {
+		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
+		if (optionalTweet.isEmpty()) {
+			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(optionalTweet.get()), HttpStatus.OK);
+	}
+
 }

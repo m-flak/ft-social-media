@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -55,11 +56,11 @@ public class User {
 	@OneToMany(mappedBy = "author")
 	private List<Tweet> tweets;
 
-	//1:31p 5/15/2020 I changed the following:
-	//@OneToMany
-	//private List<User> followers;
-	//To:
+	// 1:31p 5/15/2020 I changed the following:
+	// @OneToMany
+	// private List<User> followers;
+	// To:
 	@ManyToMany(mappedBy = "mentions")
 	private List<Tweet> tweetsMentioned;
-	
+
 }

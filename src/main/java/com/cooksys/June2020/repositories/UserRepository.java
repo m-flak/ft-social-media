@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	@Query("SELECT u FROM User u WHERE u.credentials.username = ?1")
 	User get(String username);
 
+	Optional<User> findByUsernameAndNotIsDelete(String username);
+
 }
