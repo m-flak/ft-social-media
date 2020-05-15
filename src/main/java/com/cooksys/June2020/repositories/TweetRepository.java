@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.cooksys.June2020.entities.Tweet;
 
 @Repository
-public interface TweetRepository extends JpaRepository<Tweet, Long> {
+public interface TweetRepository extends JpaRepository<Tweet, Integer> {
 
 }

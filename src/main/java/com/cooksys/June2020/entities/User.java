@@ -38,7 +38,7 @@ public class User {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Long id;
+	private Integer id;
 
 	@Column
 	private Boolean isDeleted = false;

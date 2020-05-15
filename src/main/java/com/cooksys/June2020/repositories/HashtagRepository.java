@@ -10,6 +10,6 @@ import com.cooksys.June2020.entities.HashTag;
 // JpaRepository<HashTag, Long> written to follow syntax of ChatApp.
 // JpaRepository<HashTag, Long> and not JpaRepository<Hashtag, Long>
 // written to follow syntax in entities package.
-public interface HashtagRepository extends JpaRepository<HashTag, Long> {
+public interface HashtagRepository extends JpaRepository<HashTag, Integer> {
 
 }
