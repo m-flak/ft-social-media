@@ -85,6 +85,7 @@ public class TweetService {
 		}
 
 		Tweet tweetToPost = tweetMapper.dtoToEntity(tweetRequest);
+		tweetToPost.setAuthor(authoringUser.get());
 
 		if (mentionedUsers.size() > 0) {
 			tweetToPost.setMentions(mentionedUsers);
