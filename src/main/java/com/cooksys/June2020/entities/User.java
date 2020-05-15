@@ -55,6 +55,11 @@ public class User {
 	@OneToMany(mappedBy = "author")
 	private List<Tweet> tweets;
 
-	@OneToMany
-	private List<User> followers;
+	//1:31p 5/15/2020 I changed the following:
+	//@OneToMany
+	//private List<User> followers;
+	//To:
+	@ManyToMany(mappedBy = "mentions")
+	private List<Tweet> tweetsMentioned;
+	
 }
