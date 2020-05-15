@@ -3,6 +3,8 @@ package com.cooksys.June2020.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.cooksys.June2020.dtos.TweetResponseDto;
+import com.cooksys.June2020.mappers.TweetMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -18,27 +20,27 @@ public class TagService {
 
 	private HashtagRepository hashtagRepository;
 	private HashTagMapper hashtagMapper;
+	private TweetMapper tweetMapper;
 
-	public TagService(HashtagRepository hashtagRepository) {
-		this.hashtagRepository = hashtagRepository;
-	}
-
-	public TagService(HashtagRepository hashtagRepository, HashTagMapper hashtagMapper) {
+	public TagService(HashtagRepository hashtagRepository, HashTagMapper hashtagMapper, TweetMapper tweetMapper) {
 		this.hashtagRepository = hashtagRepository;
 		this.hashtagMapper = hashtagMapper;
+		this.tweetMapper = tweetMapper;
 	}
 
 	public List<HashTagDto> getTags() {
 		return hashtagMapper.entitiesToDtos(hashtagRepository.findAll());
 	}
 
-	public ResponseEntity<List<Tweet>> getTagsByLabel(String label) {
-		Optional<HashTag> optionalHashtag = hashtagRepository.findByLabel(label);
-		List<Tweet> tweets = optionalHashtag.get().getTweets();
+	public ResponseEntity<List<TweetResponseDto>> getTagsByLabel(String label) {
+		// It's best to use our repositories.
+		List<Tweet> tweets = hashtagRepository.getHashtagTweetsNotDeleted(label);
+
 		if (tweets.isEmpty()) {
-			return new ResponseEntity<List<Tweet>>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<List<Tweet>>(hashtagMapper.entityToDto(tweets), HttpStatus.OK);
+
+		return new ResponseEntity<>(tweetMapper.entitiesToDtos(tweets), HttpStatus.OK);
 
 	}
 }

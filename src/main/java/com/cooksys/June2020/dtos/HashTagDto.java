@@ -21,5 +21,5 @@ public class HashTagDto {
 
 	private Timestamp lastUsed;
 
-	private List<Tweet> tweets;
+	private List<TweetResponseDto> tweets;
 }

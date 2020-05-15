@@ -2,6 +2,7 @@ package com.cooksys.June2020.controllers;
 
 import java.util.List;
 
+import com.cooksys.June2020.dtos.TweetResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cooksys.June2020.dtos.HashTagDto;
-import com.cooksys.June2020.entities.Tweet;
 import com.cooksys.June2020.services.TagService;
 
 @RestController
@@ -27,8 +27,8 @@ public class TagController {
 		return tagService.getTags();
 	}
 
-	@GetMapping
-	public ResponseEntity<List<Tweet>> getTagsByLabel(@PathVariable String label) {
+	@GetMapping("/{label}")
+	public ResponseEntity<List<TweetResponseDto>> getTagsByLabel(@PathVariable String label) {
 		return tagService.getTagsByLabel(label);
 	}
 

@@ -24,11 +24,14 @@ public class UserService {
 
 	public ResponseEntity<UserResponseDto> deleteByUsername(String username) {
 		Optional<User> optionalUser = userRepository.findByUsernameAndNotIsDelete(username);
-		if (optionalUser.isEmpty()) {
+		if (!optionalUser.isPresent()) {
 			return new ResponseEntity<UserResponseDto>(HttpStatus.NOT_FOUND);
 		}
 		User userToDelete = optionalUser.get();
 		userToDelete.setIsDeleted(true);
+		//save changes
+		userToDelete = userRepository.saveAndFlush(userToDelete);
+
 		return new ResponseEntity<UserResponseDto>(userMapper.entityToDto(userToDelete), HttpStatus.OK);
 	}
 

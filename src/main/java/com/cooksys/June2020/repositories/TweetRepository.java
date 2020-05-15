@@ -11,12 +11,9 @@ import com.cooksys.June2020.entities.Tweet;
 
 @Repository
 public interface TweetRepository extends JpaRepository<Tweet, Integer> {
+	@Query("SELECT t FROM Tweet t WHERE t.isDeleted = 'false'")
+	List<Tweet> findAllNotDeleted();
 
-	List<Tweet> findAllAndNotIsDeleted();
-
+	@Query("SELECT t FROM Tweet t WHERE t.id = ?1 AND t.isDeleted = 'false'")
 	Optional<Tweet> findByIdAndNotIsDeleted(Integer id);
-
-	@Query("SELECT t FROM Tweet t WHERE t.id = ?1")
-	Tweet get(Integer id);
-
 }

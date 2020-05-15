@@ -98,7 +98,7 @@ public class TweetService {
 	}
 
 	public List<TweetResponseDto> getTweets() {
-		return tweetMapper.entitiesToDtos(tweetRepository.findAllAndNotIsDeleted());
+		return tweetMapper.entitiesToDtos(tweetRepository.findAllNotDeleted());
 	}
 
 	public ResponseEntity<TweetResponseDto> deleteTweetById(Integer id) {
@@ -112,17 +112,20 @@ public class TweetService {
 		if (!authoringUser.isPresent()) {
 			throw new InvalidUserCredentialsException("Invalid Username/Password combination supplied.");
 		}
-		if (optionalTweet.isEmpty()) {
+		if (!optionalTweet.isPresent()) {
 			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
 		}
 		Tweet tweetToDelete = optionalTweet.get();
 		tweetToDelete.setIsDeleted(true);
+		// save changes
+		tweetToDelete = tweetRepository.saveAndFlush(tweetToDelete);
+
 		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(tweetToDelete), HttpStatus.OK);
 	}
 
 	public ResponseEntity<TweetResponseDto> getTweetById(Integer id) {
 		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
-		if (optionalTweet.isEmpty()) {
+		if (!optionalTweet.isPresent()) {
 			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(optionalTweet.get()), HttpStatus.OK);
