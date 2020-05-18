@@ -2,10 +2,12 @@ package com.cooksys.June2020.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.cooksys.June2020.dtos.ContextDto;
 import com.cooksys.June2020.dtos.CredentialsDto;
 import com.cooksys.June2020.exception.TweetNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -213,5 +215,51 @@ public class TweetService {
 		}
 
 		return new ResponseEntity<>(tweetMapper.entitiesToDtos(replies), HttpStatus.OK);
+	}
+
+	public ResponseEntity<ContextDto> getTweetContext(Integer id) {
+		Tweet targetTweet = validateTweet(id);
+
+		// Get all replies for a tweet and its replies.
+		// This moves downwards to get all possible CHILDREN.
+		List<Tweet> afterTweets = new ArrayList<>();
+		List<Tweet> tweetReplies = tweetRepository.findByInReplyToOrderByPostedAsc(targetTweet);
+		while(!tweetReplies.isEmpty()) {
+			final Tweet top = tweetReplies.remove(0);
+			afterTweets.add(top);
+			tweetReplies.addAll(tweetRepository.findByInReplyToOrderByPostedAsc(top));
+		}
+
+		if (!afterTweets.isEmpty()) {
+			// Removes any deleted replies
+			afterTweets.removeIf((reply) -> reply.getIsDeleted());
+			// Removes any references to deleted replies
+			afterTweets.forEach((reply) -> {
+				if (Objects.nonNull(reply.getInReplyTo())) {
+					if (reply.getInReplyTo().getIsDeleted()) {
+						reply.setInReplyTo(null);
+					}
+				}
+			});
+		}
+
+		// Gets all replies leading to the original tweet
+		// Move upwards to get all possible PARENTS
+		List<Tweet> beforeTweets = new ArrayList<>();
+		Tweet parentTweet = targetTweet.getInReplyTo();
+		while (Objects.nonNull(parentTweet)) {
+			beforeTweets.add(parentTweet);
+			parentTweet = parentTweet.getInReplyTo();
+		}
+
+		// Remove all deleted replies. No need to worry about refs to deleted posts when moving upward.
+		if (!beforeTweets.isEmpty()) {
+			beforeTweets.removeIf((reply) -> reply.getIsDeleted());
+		}
+
+		ContextDto tweetContext = new ContextDto(tweetMapper.entityToDto(targetTweet),
+			tweetMapper.entitiesToDtos(beforeTweets), tweetMapper.entitiesToDtos(afterTweets));
+
+		return new ResponseEntity<>(tweetContext, HttpStatus.OK);
 	}
 }
