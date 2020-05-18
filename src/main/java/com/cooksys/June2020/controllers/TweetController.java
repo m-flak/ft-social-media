@@ -2,6 +2,7 @@ package com.cooksys.June2020.controllers;
 
 import java.util.List;
 
+import com.cooksys.June2020.dtos.CredentialsDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,18 @@ public class TweetController {
 		return tweetService.postNewTweet(tweetRequestBody);
 	}
 
+	@PostMapping("/{id}/repost")
+	public ResponseEntity<TweetResponseDto> repostTweet(@PathVariable Integer id,
+														@RequestBody CredentialsDto credentialsRequestBody) {
+		return tweetService.repostTweet(id, credentialsRequestBody);
+	}
+
+	@PostMapping("/{id}/reply")
+	public ResponseEntity<TweetResponseDto> replyToTweet(@PathVariable Integer id,
+														 @RequestBody TweetRequestDto tweetRequestBody) {
+		return tweetService.replyToTweet(id, tweetRequestBody);
+	}
+
 	@GetMapping
 	public List<TweetResponseDto> getTweets() {
 		return tweetService.getTweets();
@@ -41,8 +54,9 @@ public class TweetController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<TweetResponseDto> deleteTweetById(@PathVariable Integer id) {
-		return tweetService.deleteTweetById(id);
+	public ResponseEntity<TweetResponseDto> deleteTweetById(@PathVariable Integer id,
+															@RequestBody CredentialsDto credentialsRequestBody) {
+		return tweetService.deleteTweetById(id, credentialsRequestBody);
 	}
 
 }

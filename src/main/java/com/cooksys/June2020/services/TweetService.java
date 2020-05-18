@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.cooksys.June2020.dtos.CredentialsDto;
 import com.cooksys.June2020.exception.TweetNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,23 +38,36 @@ public class TweetService {
 		this.hashtagRepository = hashtagRepository;
 	}
 
-	public ResponseEntity<TweetResponseDto> postNewTweet(TweetRequestDto tweetRequest) {
-		// Validate credentials
+	private User validateUserCredentials(CredentialsDto credentialsToValidate) {
 		Optional<User> authoringUser = userRepository.findByCredentialsUsernameAndCredentialsPassword(
-				tweetRequest.getCredentials().getUsername(), tweetRequest.getCredentials().getPassword());
+				credentialsToValidate.getUsername(), credentialsToValidate.getPassword());
 
 		// User Credentials are bogus, abort!
 		if (!authoringUser.isPresent()) {
 			throw new InvalidUserCredentialsException("Invalid Username/Password combination supplied.");
 		}
 
+		return authoringUser.get();
+	}
+
+	private Tweet validateTweet(Integer id) {
+		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
+
+		if (!optionalTweet.isPresent()) {
+			throw new TweetNotFoundException("The specified tweet does not exist.");
+		}
+		return optionalTweet.get();
+	}
+
+	/* (IN) tweetContent - A tweet's contents to parse
+	 * (OUT) mentionedUsers - A list to store mentioned users in
+	 * (OUT) foundHashTags - A list to store found hashtags in
+	 */
+	private void parseForLikesMentions(String tweetContent, final ArrayList<User> mentionedUsers,
+									   final ArrayList<HashTag> foundHashTags) {
 		// Create regex to pilfer the tweet's body.
 		Matcher likeMentionMatcher = Pattern.compile("([#|@]\\w+)", Pattern.MULTILINE)
-				.matcher(tweetRequest.getContent());
-
-		// Found (if any) mentioned users and/or hashtags
-		ArrayList<User> mentionedUsers = new ArrayList<>();
-		ArrayList<HashTag> hashTags = new ArrayList<>();
+				.matcher(tweetContent);
 
 		// does the contents have any mentions/hashtags?
 		if (likeMentionMatcher.find()) {
@@ -74,19 +88,29 @@ public class TweetService {
 
 					if (referencedHashTag.isPresent()) {
 						// existing hashtag
-						hashTags.add(referencedHashTag.get());
+						foundHashTags.add(referencedHashTag.get());
 					} else {
 						// new hashtag
 						HashTag newHashTag = new HashTag();
 						newHashTag.setLabel(label);
-						hashTags.add(newHashTag);
+						foundHashTags.add(newHashTag);
 					}
 				}
 			}
 		}
+	}
+
+	public ResponseEntity<TweetResponseDto> postNewTweet(TweetRequestDto tweetRequest) {
+		// Validate credentials
+		User authoringUser = validateUserCredentials(tweetRequest.getCredentials());
+
+		// Found (if any) mentioned users and/or hashtags
+		ArrayList<User> mentionedUsers = new ArrayList<>();
+		ArrayList<HashTag> hashTags = new ArrayList<>();
+		parseForLikesMentions(tweetRequest.getContent(), mentionedUsers, hashTags);
 
 		Tweet tweetToPost = tweetMapper.dtoToEntity(tweetRequest);
-		tweetToPost.setAuthor(authoringUser.get());
+		tweetToPost.setAuthor(authoringUser);
 
 		if (mentionedUsers.size() > 0) {
 			tweetToPost.setMentions(mentionedUsers);
@@ -102,21 +126,22 @@ public class TweetService {
 		return tweetMapper.entitiesToDtos(tweetRepository.findAllNotDeleted());
 	}
 
-	public ResponseEntity<TweetResponseDto> deleteTweetById(Integer id) {
-		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
-		// Validate credentials
-		Optional<User> authoringUser = userRepository.findByCredentialsUsernameAndCredentialsPassword(
-				optionalTweet.get().getAuthor().getCredentials().getUsername(),
-				optionalTweet.get().getAuthor().getCredentials().getPassword());
+	public ResponseEntity<TweetResponseDto> deleteTweetById(Integer id, CredentialsDto userCredentials) {
+		// Get tweet if it exists
+		Tweet tweetToDelete = validateTweet(id);
 
-		// User Credentials are bogus, abort!
-		if (!authoringUser.isPresent()) {
-			throw new InvalidUserCredentialsException("Invalid Username/Password combination supplied.");
+		// Check credentials of request
+		User requestingUser = validateUserCredentials(userCredentials);
+
+		// requestingUser has been authenticated, so only usernames need to be compared.
+		final String requesterUsername = requestingUser.getCredentials().getUsername();
+		final String ownerUsername = tweetToDelete.getAuthor().getCredentials().getUsername();
+
+		// the requesting user does not own the tweet so abort
+		if (!ownerUsername.equals(requesterUsername)) {
+			throw new InvalidUserCredentialsException("Cannot delete tweets by other users.");
 		}
-		if (!optionalTweet.isPresent()) {
-			throw new TweetNotFoundException("The specified tweet does not exist.");
-		}
-		Tweet tweetToDelete = optionalTweet.get();
+
 		tweetToDelete.setIsDeleted(true);
 		// save changes
 		tweetToDelete = tweetRepository.saveAndFlush(tweetToDelete);
@@ -125,11 +150,45 @@ public class TweetService {
 	}
 
 	public ResponseEntity<TweetResponseDto> getTweetById(Integer id) {
-		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
-		if (!optionalTweet.isPresent()) {
-			throw new TweetNotFoundException("The specified tweet does not exist.");
-		}
-		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(optionalTweet.get()), HttpStatus.OK);
+		Tweet tweetToGet = validateTweet(id);
+		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(tweetToGet), HttpStatus.OK);
 	}
 
+	public ResponseEntity<TweetResponseDto> repostTweet(Integer id, CredentialsDto userCredentials) {
+		Tweet originalTweet = validateTweet(id);
+		User repostingUser = validateUserCredentials(userCredentials);
+
+		Tweet repostedTweet = new Tweet();
+		repostedTweet.setAuthor(repostingUser);
+		repostedTweet.setContent(null);
+		repostedTweet.setRepostOf(originalTweet);
+		// Give the repost the same mentions & likes
+		repostedTweet.setMentions(tweetRepository.getTweetsMentions(id));
+		repostedTweet.setLikes(tweetRepository.getTweetsLikes(id));
+
+		return new ResponseEntity<>(tweetMapper.entityToDto(tweetRepository.saveAndFlush(repostedTweet)), HttpStatus.OK);
+	}
+
+	public ResponseEntity<TweetResponseDto> replyToTweet(Integer id, TweetRequestDto tweetRequest) {
+		Tweet replyingTo = validateTweet(id);
+		User authoringUser = validateUserCredentials(tweetRequest.getCredentials());
+
+		// Found (if any) mentioned users and/or hashtags
+		ArrayList<User> mentionedUsers = new ArrayList<>();
+		ArrayList<HashTag> hashTags = new ArrayList<>();
+		parseForLikesMentions(tweetRequest.getContent(), mentionedUsers, hashTags);
+
+		Tweet theReply = tweetMapper.dtoToEntity(tweetRequest);
+		theReply.setInReplyTo(replyingTo);
+		theReply.setAuthor(authoringUser);
+
+		if (mentionedUsers.size() > 0) {
+			theReply.setMentions(mentionedUsers);
+		}
+		if (hashTags.size() > 0) {
+			theReply.setHashtags(hashTags);
+		}
+
+		return new ResponseEntity<>(tweetMapper.entityToDto(tweetRepository.saveAndFlush(theReply)), HttpStatus.OK);
+	}
 }
