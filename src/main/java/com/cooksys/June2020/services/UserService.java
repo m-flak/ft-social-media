@@ -2,6 +2,8 @@ package com.cooksys.June2020.services;
 
 import java.util.Optional;
 
+import com.cooksys.June2020.exception.TweetNotFoundException;
+import com.cooksys.June2020.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class UserService {
 	public ResponseEntity<UserResponseDto> deleteByUsername(String username) {
 		Optional<User> optionalUser = userRepository.findByUsernameAndNotIsDelete(username);
 		if (!optionalUser.isPresent()) {
-			return new ResponseEntity<UserResponseDto>(HttpStatus.NOT_FOUND);
+			throw new UserNotFoundException("The specified user does not exist.");
 		}
 		User userToDelete = optionalUser.get();
 		userToDelete.setIsDeleted(true);

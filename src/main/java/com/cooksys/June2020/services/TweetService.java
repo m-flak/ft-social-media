@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.cooksys.June2020.exception.TweetNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -113,7 +114,7 @@ public class TweetService {
 			throw new InvalidUserCredentialsException("Invalid Username/Password combination supplied.");
 		}
 		if (!optionalTweet.isPresent()) {
-			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
+			throw new TweetNotFoundException("The specified tweet does not exist.");
 		}
 		Tweet tweetToDelete = optionalTweet.get();
 		tweetToDelete.setIsDeleted(true);
@@ -126,7 +127,7 @@ public class TweetService {
 	public ResponseEntity<TweetResponseDto> getTweetById(Integer id) {
 		Optional<Tweet> optionalTweet = tweetRepository.findByIdAndNotIsDeleted(id);
 		if (!optionalTweet.isPresent()) {
-			return new ResponseEntity<TweetResponseDto>(HttpStatus.NOT_FOUND);
+			throw new TweetNotFoundException("The specified tweet does not exist.");
 		}
 		return new ResponseEntity<TweetResponseDto>(tweetMapper.entityToDto(optionalTweet.get()), HttpStatus.OK);
 	}

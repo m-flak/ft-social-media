@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.cooksys.June2020.dtos.TweetResponseDto;
+import com.cooksys.June2020.exception.HashtagNotFoundException;
 import com.cooksys.June2020.mappers.TweetMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class TagService {
 		List<Tweet> tweets = hashtagRepository.getHashtagTweetsNotDeleted(label);
 
 		if (tweets.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new HashtagNotFoundException("The specified hashtag does not exist.");
 		}
 
 		return new ResponseEntity<>(tweetMapper.entitiesToDtos(tweets), HttpStatus.OK);
