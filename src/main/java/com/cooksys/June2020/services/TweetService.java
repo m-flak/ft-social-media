@@ -191,4 +191,27 @@ public class TweetService {
 
 		return new ResponseEntity<>(tweetMapper.entityToDto(tweetRepository.saveAndFlush(theReply)), HttpStatus.OK);
 	}
+
+	public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(Integer id) {
+		Tweet parentTweet = validateTweet(id);
+		List<Tweet> reposts = tweetRepository.findByRepostOfAndIsDeletedFalse(parentTweet);
+
+		// Return HTTP204 if there are no reposts.
+		if (reposts.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		return new ResponseEntity<>(tweetMapper.entitiesToDtos(reposts), HttpStatus.OK);
+	}
+
+	public ResponseEntity<List<TweetResponseDto>> getRepliesOfTweet(Integer id) {
+		Tweet parentTweet = validateTweet(id);
+		List<Tweet> replies = tweetRepository.findByInReplyToAndIsDeletedFalse(parentTweet);
+
+		if (replies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		return new ResponseEntity<>(tweetMapper.entitiesToDtos(replies), HttpStatus.OK);
+	}
 }

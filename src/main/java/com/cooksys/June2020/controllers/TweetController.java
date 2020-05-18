@@ -53,6 +53,16 @@ public class TweetController {
 		return tweetService.getTweetById(id);
 	}
 
+	@GetMapping("/{id}/reposts")
+	public ResponseEntity<List<TweetResponseDto>> getRepostsOfTweet(@PathVariable Integer id) {
+		return tweetService.getRepostsOfTweet(id);
+	}
+
+	@GetMapping("/{id}/replies")
+	public ResponseEntity<List<TweetResponseDto>> getRepliesOfTweet(@PathVariable Integer id) {
+		return tweetService.getRepliesOfTweet(id);
+	}
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<TweetResponseDto> deleteTweetById(@PathVariable Integer id,
 															@RequestBody CredentialsDto credentialsRequestBody) {
