@@ -4,6 +4,7 @@ import com.cooksys.June2020.dtos.*;
 import com.cooksys.June2020.entities.HashTag;
 import com.cooksys.June2020.entities.Tweet;
 import com.cooksys.June2020.entities.User;
+import com.cooksys.June2020.exception.BadRequestException;
 import com.cooksys.June2020.exception.InvalidUserCredentialsException;
 import com.cooksys.June2020.exception.TweetNotFoundException;
 import com.cooksys.June2020.mappers.HashTagMapper;
@@ -40,6 +41,18 @@ public class TweetService {
             throw new TweetNotFoundException("The specified tweet does not exist.");
         }
         return optionalTweet.get();
+    }
+
+    // This'll prevent error 500s if invalid request dtos are sent
+    private void validateTweetRequest(TweetRequestDto requestDto) {
+        if (Objects.isNull(requestDto.getContent()) ||
+              Objects.isNull(requestDto.getCredentials())) {
+            throw new BadRequestException("Invalid request body.");
+        }
+
+        if (requestDto.getContent().isEmpty()) {
+            throw new BadRequestException("Cannot post an empty tweet.");
+        }
     }
 
     /* (IN) tweetContent - A tweet's contents to parse
@@ -84,6 +97,7 @@ public class TweetService {
     }
 
     public ResponseEntity<TweetResponseDto> postNewTweet(TweetRequestDto tweetRequest) {
+        validateTweetRequest(tweetRequest);
         // Validate credentials
         User authoringUser = validateService.validateUserCredentials(tweetRequest.getCredentials());
 
@@ -153,6 +167,8 @@ public class TweetService {
     }
 
     public ResponseEntity<TweetResponseDto> replyToTweet(Integer id, TweetRequestDto tweetRequest) {
+        validateTweetRequest(tweetRequest);
+        
         Tweet replyingTo = validateTweet(id);
         User authoringUser = validateService.validateUserCredentials(tweetRequest.getCredentials());
 
