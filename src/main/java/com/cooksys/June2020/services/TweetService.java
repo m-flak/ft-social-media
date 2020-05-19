@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import com.cooksys.June2020.dtos.ContextDto;
 import com.cooksys.June2020.dtos.CredentialsDto;
 import com.cooksys.June2020.exception.TweetNotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,20 +27,14 @@ import com.cooksys.June2020.repositories.TweetRepository;
 import com.cooksys.June2020.repositories.UserRepository;
 
 @Service
+@AllArgsConstructor
 public class TweetService {
-	private HashtagRepository hashtagRepository;
-	private UserRepository userRepository;
-	private TweetRepository tweetRepository;
-	private TweetMapper tweetMapper;
 
-	public TweetService(UserRepository userRepository, TweetRepository tweetRepository, TweetMapper tweetMapper,
-			HashtagRepository hashtagRepository) {
-		this.userRepository = userRepository;
-		this.tweetRepository = tweetRepository;
-		this.tweetMapper = tweetMapper;
-		this.hashtagRepository = hashtagRepository;
-	}
-
+	private final HashtagRepository hashtagRepository;
+	private final UserRepository userRepository;
+	private final TweetRepository tweetRepository;
+	private final TweetMapper tweetMapper;
+	
 	private User validateUserCredentials(CredentialsDto credentialsToValidate) {
 		Optional<User> authoringUser = userRepository.findByCredentialsUsernameAndCredentialsPassword(
 				credentialsToValidate.getUsername(), credentialsToValidate.getPassword());
@@ -115,7 +110,7 @@ public class TweetService {
 		tweetToPost.setAuthor(authoringUser);
 
 		if (mentionedUsers.size() > 0) {
-			tweetToPost.setMentions(mentionedUsers);
+			tweetToPost.setMentionedUsers(mentionedUsers);
 		}
 		if (hashTags.size() > 0) {
 			tweetToPost.setHashtags(hashTags);
@@ -165,7 +160,7 @@ public class TweetService {
 		repostedTweet.setContent(null);
 		repostedTweet.setRepostOf(originalTweet);
 		// Give the repost the same mentions & likes
-		repostedTweet.setMentions(tweetRepository.getTweetsMentions(id));
+		repostedTweet.setMentionedUsers(tweetRepository.getTweetsMentions(id));
 		repostedTweet.setLikes(tweetRepository.getTweetsLikes(id));
 
 		return new ResponseEntity<>(tweetMapper.entityToDto(tweetRepository.saveAndFlush(repostedTweet)), HttpStatus.OK);
@@ -185,7 +180,7 @@ public class TweetService {
 		theReply.setAuthor(authoringUser);
 
 		if (mentionedUsers.size() > 0) {
-			theReply.setMentions(mentionedUsers);
+			theReply.setMentionedUsers(mentionedUsers);
 		}
 		if (hashTags.size() > 0) {
 			theReply.setHashtags(hashTags);
