@@ -22,8 +22,23 @@ public class UserService {
     private final UserMapper userMapper;
     private final ValidateService validateService;
 
+    private void validateRequest(UserRequestDto userRequestDto) {
+        if (userRequestDto.getCredentials() == null) {
+            throw new BadRequestException("You must pass in a username and password");
+        }
+        if (userRequestDto.getCredentials().getUsername() == null) {
+            throw new BadRequestException("A username must be provided");
+        }
+        if (userRequestDto.getCredentials().getPassword() == null) {
+            throw new BadRequestException("A password must be provided");
+        }
+        if (userRequestDto.getProfile() == null || userRequestDto.getProfile().getEmail() == null) {
+            throw new BadRequestException("An email must be provided");
+        }
+    }
+
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
-        validateService.validateRequest(userRequestDto);
+        validateRequest(userRequestDto);
         if (userRepository.findByCredentialsUsername(userRequestDto.getCredentials().getUsername()).isPresent()) {
             throw new UserExistsException();
         }
@@ -43,7 +58,7 @@ public class UserService {
     }
 
     public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
-        validateService.validateRequest(userRequestDto);
+        validateRequest(userRequestDto);
         User userToUpdate = validateService.validateUserCredentials(userRequestDto.getCredentials());
         if (!userToUpdate.getCredentials().getUsername().equals(username)) {
             throw new BadRequestException("The provided username must match the username in the provided credentials");

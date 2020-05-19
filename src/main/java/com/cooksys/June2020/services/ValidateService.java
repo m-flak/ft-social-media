@@ -28,20 +28,5 @@ public class ValidateService {
         return potentialUser.get();
     }
 
-    public void validateRequest(UserRequestDto userRequestDto) {
-        if (userRequestDto.getCredentials() == null) {
-            throw new BadRequestException("You must pass in a username and password");
-        }
-        if (userRequestDto.getCredentials().getUsername() == null) {
-            throw new BadRequestException("A username must be provided");
-        }
-        if (userRequestDto.getCredentials().getPassword() == null) {
-            throw new BadRequestException("A password must be provided");
-        }
-        if (userRequestDto.getProfile() == null || userRequestDto.getProfile().getEmail() == null) {
-            throw new BadRequestException("An email must be provided");
-        }
-    }
-
 
 }
