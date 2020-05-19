@@ -181,21 +181,12 @@ public class TweetService {
         Tweet parentTweet = validateTweet(id);
         List<Tweet> reposts = tweetRepository.findByRepostOfAndIsDeletedFalse(parentTweet);
 
-        // Return HTTP204 if there are no reposts.
-        if (reposts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
         return new ResponseEntity<>(tweetMapper.entitiesToDtos(reposts), HttpStatus.OK);
     }
 
     public ResponseEntity<List<TweetResponseDto>> getRepliesOfTweet(Integer id) {
         Tweet parentTweet = validateTweet(id);
         List<Tweet> replies = tweetRepository.findByInReplyToAndIsDeletedFalse(parentTweet);
-
-        if (replies.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
 
         return new ResponseEntity<>(tweetMapper.entitiesToDtos(replies), HttpStatus.OK);
     }
@@ -214,16 +205,29 @@ public class TweetService {
         }
 
         if (!afterTweets.isEmpty()) {
-            // Removes any deleted replies
-            afterTweets.removeIf((reply) -> reply.getIsDeleted());
-            // Removes any references to deleted replies
-            afterTweets.forEach((reply) -> {
-                if (Objects.nonNull(reply.getInReplyTo())) {
-                    if (reply.getInReplyTo().getIsDeleted()) {
-                        reply.setInReplyTo(null);
+            // Removes any deleted replies and/or references to deleted replies
+            int afterTweetSz = afterTweets.size();
+            for (int i = 0; i < afterTweetSz; i++) {
+                try {
+                    if (afterTweets.get(i).getIsDeleted()) {
+                        afterTweets.remove(i);
+                        afterTweetSz -= 1;
+                        // don't change the index if we removed the top element
+                        i = i == 0 ? 0 : i - 1;
+                        continue;
+                    }
+                    // Reference to a deleted reply. If it's deleted, remove it from the 'inReplyTo' field.
+                    Tweet inReplyToFieldContents = afterTweets.get(i).getInReplyTo();
+                    if (Objects.nonNull(inReplyToFieldContents)) {
+                        if (inReplyToFieldContents.getIsDeleted()) {
+                            afterTweets.get(i).setInReplyTo(null);
+                        }
                     }
                 }
-            });
+                catch (NullPointerException npe) {
+                    continue;
+                }
+            }
         }
 
         // Gets all replies leading to the original tweet
