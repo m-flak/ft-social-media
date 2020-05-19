@@ -1,25 +1,21 @@
 package com.cooksys.June2020.repositories;
 
-import java.util.Optional;
-
+import com.cooksys.June2020.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.cooksys.June2020.entities.User;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-	Optional<User> findByCredentialsUsername(String username);
+    Optional<User> findByCredentialsUsername(String username);
 
-	Optional<User> findByCredentialsUsernameAndCredentialsPassword(String username, String password);
+    Optional<User> findByCredentialsUsernameAndCredentialsPasswordAndIsDeletedIsFalse(String username, String password);
 
-	Optional<User> findByProfileEmail(String email);
+    Optional<User> findByCredentialsUsernameAndIsDeletedIsFalse(String username);
 
-	@Query("SELECT u FROM User u WHERE u.credentials.username = ?1")
-	User get(String username);
+    List<User> findAllByIsDeletedIsFalse();
 
-	@Query("SELECT u FROM User u WHERE u.credentials.username = ?1 AND u.isDeleted = 'false'")
-	Optional<User> findByUsernameAndNotIsDelete(String username);
 }

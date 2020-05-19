@@ -36,4 +36,18 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(userNotFoundException, userNotFoundException.getMessage(), null,
                 HttpStatus.NOT_FOUND, webRequest);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleBadRequestException(BadRequestException badRequestException,
+                                                            WebRequest webRequest) {
+        return handleExceptionInternal(badRequestException, badRequestException.getMessage(), null,
+                HttpStatus.BAD_REQUEST, webRequest);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> handleUserExistsException(UserExistsException userExistsException,
+                                                            WebRequest webRequest) {
+        return handleExceptionInternal(userExistsException, userExistsException.getMessage(), null,
+                HttpStatus.BAD_REQUEST, webRequest);
+    }
 }
