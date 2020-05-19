@@ -1,15 +1,14 @@
 package com.cooksys.June2020.services;
 
-import com.cooksys.June2020.dtos.ContextDto;
-import com.cooksys.June2020.dtos.CredentialsDto;
-import com.cooksys.June2020.dtos.TweetRequestDto;
-import com.cooksys.June2020.dtos.TweetResponseDto;
+import com.cooksys.June2020.dtos.*;
 import com.cooksys.June2020.entities.HashTag;
 import com.cooksys.June2020.entities.Tweet;
 import com.cooksys.June2020.entities.User;
 import com.cooksys.June2020.exception.InvalidUserCredentialsException;
 import com.cooksys.June2020.exception.TweetNotFoundException;
+import com.cooksys.June2020.mappers.HashTagMapper;
 import com.cooksys.June2020.mappers.TweetMapper;
+import com.cooksys.June2020.mappers.UserMapper;
 import com.cooksys.June2020.repositories.HashtagRepository;
 import com.cooksys.June2020.repositories.TweetRepository;
 import com.cooksys.June2020.repositories.UserRepository;
@@ -18,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +26,9 @@ import java.util.regex.Pattern;
 public class TweetService {
 
     private final HashtagRepository hashtagRepository;
+    private final HashTagMapper hashTagMapper;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
     private final ValidateService validateService;
@@ -248,5 +246,50 @@ public class TweetService {
                 tweetMapper.entitiesToDtos(beforeTweets), tweetMapper.entitiesToDtos(afterTweets));
 
         return new ResponseEntity<>(tweetContext, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> likeTweet(Integer id, CredentialsDto userCredentials) {
+        Tweet tweetToLike = validateTweet(id);
+        User likingUser = validateService.validateUserCredentials(userCredentials);
+
+        Optional<List<User>> currentTweetLikes = Optional.ofNullable(tweetToLike.getLikes());
+
+        if (currentTweetLikes.isPresent()) {
+            currentTweetLikes.get().add(likingUser);
+        }
+        else {
+            tweetToLike.setLikes(Arrays.asList(likingUser));
+        }
+
+        tweetRepository.saveAndFlush(tweetToLike);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<HashTagDto>> getTagsOfTweet(Integer id) {
+       validateTweet(id);
+
+       return new ResponseEntity<>(hashTagMapper.entitiesToDtos(tweetRepository.getTweetsHashtags(id)), HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<UserResponseDto>> getLikesOfTweet(Integer id) {
+        validateTweet(id);
+
+        List<User> likingUsers = tweetRepository.getTweetsLikes(id);
+        if (!likingUsers.isEmpty()) {
+            likingUsers.removeIf((user) -> user.getIsDeleted());
+        }
+
+        return new ResponseEntity<>(userMapper.entitiesToDtos(likingUsers), HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<UserResponseDto>> getMentionsOfTweet(Integer id) {
+        validateTweet(id);
+
+        List<User> mentionedUsers = tweetRepository.getTweetsMentions(id);
+        if (!mentionedUsers.isEmpty()) {
+            mentionedUsers.removeIf((user) -> user.getIsDeleted());
+        }
+
+        return new ResponseEntity<>(userMapper.entitiesToDtos(mentionedUsers), HttpStatus.OK);
     }
 }

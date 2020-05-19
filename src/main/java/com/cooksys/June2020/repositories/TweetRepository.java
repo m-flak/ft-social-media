@@ -1,5 +1,6 @@
 package com.cooksys.June2020.repositories;
 
+import com.cooksys.June2020.entities.HashTag;
 import com.cooksys.June2020.entities.Tweet;
 import com.cooksys.June2020.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +29,7 @@ public interface TweetRepository extends JpaRepository<Tweet, Integer> {
 
     @Query("SELECT mentions FROM Tweet t JOIN t.mentionedUsers mentions WHERE t.id = ?1")
     List<User> getTweetsMentions(Integer id);
+
+    @Query("SELECT hashtags FROM Tweet t JOIN t.hashtags hashtags WHERE t.id = ?1")
+    List<HashTag> getTweetsHashtags(Integer id);
 }
