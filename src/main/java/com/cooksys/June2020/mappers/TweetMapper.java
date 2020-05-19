@@ -9,12 +9,13 @@ import com.cooksys.June2020.dtos.TweetResponseDto;
 import com.cooksys.June2020.entities.Tweet;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface TweetMapper {
-	@Mapping(source = "posted", target = "timestamp")
+
 	TweetResponseDto entityToDto(Tweet tweet);
 
 	List<TweetResponseDto> entitiesToDtos(List<Tweet> tweets);
 
 	Tweet dtoToEntity(TweetRequestDto dto);
+
 }

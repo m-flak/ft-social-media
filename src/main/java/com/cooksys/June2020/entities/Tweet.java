@@ -37,36 +37,39 @@ public class Tweet {
 	private Boolean isDeleted = false;
 
 	@CreationTimestamp
-	@Column(name = "posted_at")
 	private Timestamp posted;
 
 	@ManyToOne
+	@JoinColumn
 	private User author;
 
 	@Column
 	private String content;
 
 	@ManyToMany
-	private List<User> mentions;
+	private List<User> mentionedUsers;
 
 	@ManyToMany
 	private List<User> likes;
-
-	@OneToMany(mappedBy = "inReplyTo")
-	private List<Tweet> inReplyTos;
-
-	@OneToMany(mappedBy = "repostOf")
-	private List<Tweet> repostOfs;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "reply_id")
 	private Tweet inReplyTo;
 
+	@OneToMany(mappedBy = "inReplyTo")
+	private List<Tweet> replies;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "repost_id")
 	private Tweet repostOf;
 
+	@OneToMany(mappedBy = "repostOf")
+	private List<Tweet> reposts;
+
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<HashTag> hashtags;
+
+	@ManyToMany(mappedBy = "likedTweets")
+	private List<User> usersWhoLike;
 
 }

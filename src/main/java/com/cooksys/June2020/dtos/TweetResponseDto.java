@@ -16,7 +16,7 @@ public class TweetResponseDto {
 
 	private UserResponseDto author;
 
-	private Timestamp timestamp;
+	private Timestamp posted;
 
 	private String content;
 

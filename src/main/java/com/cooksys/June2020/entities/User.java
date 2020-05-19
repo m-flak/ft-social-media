@@ -26,26 +26,15 @@ import lombok.Setter;
 @Setter
 public class User {
 
-// Below I have two forms of setting up the User entity method. The first, (commented out), is
-// coming from the example given in the June2020 assignment. I assume this is what we will use. 
-// The second is from the chat app example. Right now I'm going back and reviewing the videos and notes.
-// However, I did want to post this as a branch for the time being.
-// Here, I also left in the (name = "usertable"), added a time-stamp and made relationships between other tables.
-// Please feel free to destroy or adjust with any thoughts. I'm sure there are issues.
-
-//	username: 'string',
-//	profile: 'Profile',
-//	joined: 'timestamp'
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Integer id;
 
-	@Column
+	@Column(nullable = false)
 	private Boolean isDeleted = false;
 
 	@CreationTimestamp
-	private Timestamp timestamp;
+	private Timestamp joined;
 
 	@Embedded
 	private Credentials credentials;
@@ -56,11 +45,16 @@ public class User {
 	@OneToMany(mappedBy = "author")
 	private List<Tweet> tweets;
 
-	// 1:31p 5/15/2020 I changed the following:
-	// @OneToMany
-	// private List<User> followers;
-	// To:
-	@ManyToMany(mappedBy = "mentions")
-	private List<Tweet> tweetsMentioned;
+	@ManyToMany(mappedBy = "mentionedUsers")
+	private List<Tweet> mentions;
+
+	@ManyToMany
+	private List<User> followers;
+
+	@ManyToMany(mappedBy = "followers")
+	private List<User> following;
+
+	@ManyToMany
+	private List<Tweet> likedTweets;
 
 }
