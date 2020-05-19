@@ -28,5 +28,11 @@ public class ValidateService {
         return potentialUser.get();
     }
 
+    public boolean hashtagExists(String hashtagLabel) {
+        return (hashtagRepository.countByLabel(hashtagLabel) == 1);
+    }
 
+    public boolean usernameAvailable(String username) {
+        return (userRepository.countByCredentialsUsername(username) == 0);
+    }
 }

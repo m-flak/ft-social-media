@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface HashtagRepository extends JpaRepository<HashTag, Integer> {
     Optional<HashTag> findByLabel(String label);
 
+    int countByLabel(String label);
+
     @Query("SELECT tweet FROM HashTag AS tag, IN(tag.tweets) tweet WHERE tag.label = ?1 AND tweet.isDeleted = false")
     List<Tweet> getHashtagTweetsNotDeleted(String label);
 }
