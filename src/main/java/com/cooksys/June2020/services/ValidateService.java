@@ -35,4 +35,8 @@ public class ValidateService {
     public boolean usernameAvailable(String username) {
         return (userRepository.countByCredentialsUsername(username) == 0);
     }
+
+    public boolean usernameExists(String username) {
+        return (userRepository.countByCredentialsUsernameAndIsDeletedIsFalse(username) == 1);
+    }
 }

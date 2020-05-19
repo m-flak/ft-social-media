@@ -26,4 +26,9 @@ public class ValidateController {
 	public boolean usernameAvailable(@PathVariable String username) {
 		return validateService.usernameAvailable(username);
 	}
+
+	@GetMapping("/username/exists/@{username}")
+	public boolean usernameExists(@PathVariable String username) {
+		return validateService.usernameExists(username);
+	}
 }

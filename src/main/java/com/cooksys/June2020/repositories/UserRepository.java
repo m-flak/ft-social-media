@@ -20,4 +20,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     int countByCredentialsUsername(String username);
 
+    int countByCredentialsUsernameAndIsDeletedIsFalse(String username);
 }
