@@ -26,6 +26,6 @@ public interface TweetRepository extends JpaRepository<Tweet, Integer> {
     @Query("SELECT likes FROM Tweet t JOIN t.likes likes WHERE t.id = ?1")
     List<User> getTweetsLikes(Integer id);
 
-    @Query("SELECT mentions FROM Tweet t JOIN t.mentions mentions WHERE t.id = ?1")
+    @Query("SELECT mentions FROM Tweet t JOIN t.mentionedUsers mentions WHERE t.id = ?1")
     List<User> getTweetsMentions(Integer id);
 }
