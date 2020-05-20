@@ -2,6 +2,7 @@ package com.cooksys.June2020.controllers;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cooksys.June2020.dtos.TweetRequestDto;
+import com.cooksys.June2020.dtos.TweetResponseDto;
 import com.cooksys.June2020.dtos.UserRequestDto;
 import com.cooksys.June2020.dtos.UserResponseDto;
 import com.cooksys.June2020.services.UserService;
@@ -50,9 +53,12 @@ public class UserController {
 	}
 
 	@GetMapping("/@{username}/tweets")
-	public UserResponseDto getUserByTweets(@PathVariable String tweet) {
-		return userService.getUserByTweets(tweet);
+	public ResponseEntity<List<TweetResponseDto>> getUserTweets(@PathVariable String username) {
+		return null;
 	}
+//	public UserResponseDto getUserByTweets(@PathVariable String tweet) {
+//		return userService.getUserByTweets(tweet);
+//	}
 
 	// should feed be in the form of a list?
 	@GetMapping("/@{username}/feed")
@@ -67,24 +73,33 @@ public class UserController {
 	}
 
 	@PostMapping("/@{username}/follow")
-	public UserResponseDto createUserByFollow(@RequestBody UserRequestDto userRequestDto) {
-		return userService.createUserByFollow(userRequestDto);
+	public ResponseEntity<TweetResponseDto> createFollow(@PathVariable String username,
+			@RequestBody TweetRequestDto follow) {
+		return null;
 	}
+//	public UserResponseDto createUserByFollow(@RequestBody UserRequestDto userRequestDto) {
+//		return userService.createUserByFollow(userRequestDto);
+//	}
 
 	@PostMapping("/@{username}/unfollow")
-	public UserResponseDto createUserByUnfollow(@RequestBody UserRequestDto userRequestDto) {
-		return userService.createUserByUnfollow(userRequestDto);
+	public ResponseEntity<TweetResponseDto> deleteFollow(@PathVariable String username,
+			@RequestBody TweetRequestDto follow) {
+		return null;
 	}
 
-	// should followers be in the form of a list?
+//	@PostMapping("/@{username}/unfollow")
+//	public UserResponseDto createUserByUnfollow(@RequestBody UserRequestDto userRequestDto) {
+//		return userService.createUserByUnfollow(userRequestDto);
+//	}
+
 	@GetMapping("/@{username}/followers")
-	public UserResponseDto getUserByFollowers(@PathVariable String followers) {
-		return userService.getUserByFollowers(followers);
+	public UserResponseDto getFollowers(@PathVariable String username) {
+		return userService.getFollowers(List <username>);
 	}
 
-	@GetMapping("/@{username}/followering")
-	public UserResponseDto getUserByFollowering(@PathVariable String followering) {
-		return userService.getUserByFollowering(followering);
+	@GetMapping("/@{username}/following")
+	public UserResponseDto getFollowing(@PathVariable String following) {
+		return userService.getFollowing(List <username>);
 	}
 
 }
