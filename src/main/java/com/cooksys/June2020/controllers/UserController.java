@@ -117,6 +117,7 @@ public class UserController {
 		return userService.getFollowers(List <username>);
 	}
 
+// 	Additional method below was suggested by Matt
 	@GetMapping("/@{username}/followers")
 	public List<UserResponseDto> getFollowers(@PathVariable String username) {
 		return userService.getFollowers(username);
@@ -127,6 +128,7 @@ public class UserController {
 		return userService.getFollowing(List <username>);
 	}
 
+// 	Additional method below was suggested by Matt
 	@GetMapping("/@{username}/following")
 	public List<UserResponseDto> getFollowers(@PathVariable String username) {
 		return userService.getFollowing(username);
