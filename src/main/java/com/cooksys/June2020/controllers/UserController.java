@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cooksys.June2020.dtos.TweetRequestDto;
+import com.cooksys.June2020.dtos.CredentialsDto;
 import com.cooksys.June2020.dtos.TweetResponseDto;
 import com.cooksys.June2020.dtos.UserRequestDto;
 import com.cooksys.June2020.dtos.UserResponseDto;
@@ -52,54 +52,84 @@ public class UserController {
 		return userService.deleteByUsername(username);
 	}
 
-	@GetMapping("/@{username}/tweets")
-	public ResponseEntity<List<TweetResponseDto>> getUserTweets(@PathVariable String username) {
-		return null;
-	}
+//	Attempt 1 get tweets
+//	@GetMapping("/@username}/tweets")
 //	public UserResponseDto getUserByTweets(@PathVariable String tweet) {
 //		return userService.getUserByTweets(tweet);
 //	}
 
-	// should feed be in the form of a list?
-	@GetMapping("/@{username}/feed")
-	public UserResponseDto getUserByFeed(@PathVariable String feed) {
-		return userService.getUserByFeed(feed);
+	@GetMapping("/@{username}/tweets")
+	public ResponseEntity<List<TweetResponseDto>> getUserTweets(@PathVariable String username) {
+		// return null; // return tweets from author ordered by tweet timestamp
 	}
 
-	// should mentions be in the form of a list?
-	@GetMapping("/@{username}/mentions")
-	public UserResponseDto getUserByMentions(@PathVariable String mentions, String mention) {
-		return userService.getUserByMentions(mention);
-	}
+//	Attempt 1 get feed
+//	// should feed be in the form of a list?
+//	@GetMapping("/@{username}/feed")
+//	public UserResponseDto getUserByFeed(@PathVariable String feed) {
+//		return userService.getUserByFeed(feed);
+//	}
+//	Attempt 1 get mentions
+//	// should mentions be in the form of a list?
+//	@GetMapping("/@{username}/mentions")
+//	public UserResponseDto getUserByMentions(@PathVariable String mentions, String mention) {
+//		return userService.getUserByMentions(mention);
+//	}
 
-	@PostMapping("/@{username}/follow")
-	public ResponseEntity<TweetResponseDto> createFollow(@PathVariable String username,
-			@RequestBody TweetRequestDto follow) {
-		return null;
-	}
+//	Attempt 1 post follow
+//	@PostMapping("/@{username}/follow")
 //	public UserResponseDto createUserByFollow(@RequestBody UserRequestDto userRequestDto) {
 //		return userService.createUserByFollow(userRequestDto);
 //	}
+//	Attempt 2 post follow
+//	@PostMapping("/@{username}/follow")
+//	public ResponseEntity<TweetResponseDto> createFollow(@PathVariable String username,
+//			@RequestBody TweetRequestDto follow) {
+//		return null;
+//	}
 
-	@PostMapping("/@{username}/unfollow")
-	public ResponseEntity<TweetResponseDto> deleteFollow(@PathVariable String username,
-			@RequestBody TweetRequestDto follow) {
-		return null;
+	@PostMapping("/@{username}/follow")
+	public ResponseEntity<Object> createFollow(@PathVariable String username,
+			@RequestBody CredentialsDto credentialsRequest) {
+		return userService.createFollow(username, credentialsRequest);
 	}
 
+//	Attempt 1 post unfollow
 //	@PostMapping("/@{username}/unfollow")
 //	public UserResponseDto createUserByUnfollow(@RequestBody UserRequestDto userRequestDto) {
 //		return userService.createUserByUnfollow(userRequestDto);
+//	}	
+//	Attempt 2 post unfollow
+//	@PostMapping("/@{username}/unfollow")
+//	public ResponseEntity<TweetResponseDto> deleteFollow(@PathVariable String username,
+//			@RequestBody TweetRequestDto follow) {
+//		return null;
 //	}
+
+	@PostMapping("/@{username}/unfollow")
+	public ResponseEntity<Object> deleteFollow(@PathVariable String username,
+			@RequestBody CredentialsDto credentialsRequest) {
+		return userService.deleteFollow(username, credentialsRequest);
+	}
 
 	@GetMapping("/@{username}/followers")
 	public UserResponseDto getFollowers(@PathVariable String username) {
 		return userService.getFollowers(List <username>);
 	}
 
+	@GetMapping("/@{username}/followers")
+	public List<UserResponseDto> getFollowers(@PathVariable String username) {
+		return userService.getFollowers(username);
+	}
+
 	@GetMapping("/@{username}/following")
 	public UserResponseDto getFollowing(@PathVariable String following) {
 		return userService.getFollowing(List <username>);
+	}
+
+	@GetMapping("/@{username}/following")
+	public List<UserResponseDto> getFollowers(@PathVariable String username) {
+		return userService.getFollowing(username);
 	}
 
 }
