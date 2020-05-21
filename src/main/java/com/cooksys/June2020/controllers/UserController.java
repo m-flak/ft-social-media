@@ -68,6 +68,12 @@ public class UserController {
 //	@GetMapping("/@{username}/feed")
 //	public UserResponseDto getUserByFeed(@PathVariable String feed) {
 //		return userService.getUserByFeed(feed);
+
+	@GetMapping('/@{username}')
+	public ResponseEntity<List<TweetResponseDto>> getUserTweets(@PathVariable String username) {
+		// return tweets from author and that author follows ordered by timestamp
+	}
+
 //	}
 //	Attempt 1 get mentions
 //	// should mentions be in the form of a list?
