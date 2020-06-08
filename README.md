@@ -1,5 +1,9 @@
-FastTrack'D - Second Assessment
+FastTrack'D - "Social Media" Assessment 
 ===============================
+
+This is a project that I worked on in a team in an Agile-simulated environment.
+
+[CLICK HERE FOR ALL OF MY COMMITS.](https://github.com/m-flak/ft-social-media/commits?author=m-flak)
 
 ## Overview
 
