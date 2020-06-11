@@ -81,46 +81,4 @@ public class UserService {
 		userToDelete.setIsDeleted(true);
 		return userMapper.entityToDto(userRepository.saveAndFlush(userToDelete));
 	}
-
-	public UserResponseDto getUserByTweets(String tweet) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public UserResponseDto getUserByFeed(String feed) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// would this go in TweetServices?
-	public UserResponseDto getUserByMentions(String mention) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public UserResponseDto createUserByFollow(UserRequestDto userRequestDto) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public UserResponseDto createUserByUnfollow(UserRequestDto userRequestDto) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public UserResponseDto getUserByFollowers(String followers) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public UserResponseDto getUserByFollowering(String followering) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-//	public ResponseEntity<List<com.cooksys.June2020.dtos.TweetResponseDto>> getUserTweets(String username) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
 }
