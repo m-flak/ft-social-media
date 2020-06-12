@@ -3,16 +3,18 @@ package com.cooksys.June2020.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.cooksys.June2020.dtos.UserRequestDto;
-import com.cooksys.June2020.dtos.UserResponseDto;
-import com.cooksys.June2020.entities.User;
+import com.cooksys.June2020.dtos.*;
+import com.cooksys.June2020.entities.*;
+import com.cooksys.June2020.mappers.*;
+import com.cooksys.June2020.repositories.*;
 import com.cooksys.June2020.exception.BadRequestException;
 import com.cooksys.June2020.exception.UserExistsException;
 import com.cooksys.June2020.exception.UserNotFoundException;
-import com.cooksys.June2020.mappers.UserMapper;
-import com.cooksys.June2020.repositories.UserRepository;
+
 
 import lombok.AllArgsConstructor;
 
@@ -20,9 +22,11 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserService {
 
-	private final UserRepository userRepository;
-	private final UserMapper userMapper;
-	private final ValidateService validateService;
+    private final UserRepository userRepository;
+    private final TweetRepository tweetRepository;
+    private final UserMapper userMapper;
+    private final TweetMapper tweetMapper;
+    private final ValidateService validateService;
 
 	private void validateRequest(UserRequestDto userRequestDto) {
 		if (userRequestDto.getCredentials() == null) {
@@ -80,5 +84,22 @@ public class UserService {
 		User userToDelete = optionalUser.get();
 		userToDelete.setIsDeleted(true);
 		return userMapper.entityToDto(userRepository.saveAndFlush(userToDelete));
+	}
+
+    public ResponseEntity<Boolean> loginUser(CredentialsDto credentialsDto) {
+        Optional<User> optionalUser = userRepository.findByCredentialsUsernameAndCredentialsPasswordAndIsDeletedIsFalse(credentialsDto.getUsername(), credentialsDto.getPassword());
+		if (optionalUser.isPresent()) {
+			return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		}
+		return new ResponseEntity<Boolean>(false, HttpStatus.UNAUTHORIZED);
+    }
+
+	public List<TweetResponseDto> getUserTweets(String username) {
+    	Optional<User> optionalUser = userRepository.findByCredentialsUsername(username);
+    	if (optionalUser.isPresent()) {
+    		List<Tweet> tweets = tweetRepository.findByAuthor(optionalUser.get());
+    		return tweetMapper.entitiesToDtos(tweets);
+		}
+    	throw new UserNotFoundException("The username provided could not be found");
 	}
 }
