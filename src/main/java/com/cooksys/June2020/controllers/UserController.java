@@ -45,4 +45,15 @@ public class UserController {
 	public UserResponseDto deleteByUsername(@PathVariable String username) {
 		return userService.deleteByUsername(username);
 	}
+
+	@PostMapping("/login")
+	public ResponseEntity<Boolean> loginUser(@RequestBody CredentialsDto credentialsDto) {
+		return userService.loginUser(credentialsDto);
+	}
+
+	@GetMapping("/@{username}/tweets")
+	public List<TweetResponseDto> getUserTweets(@PathVariable String username) {
+		return userService.getUserTweets(username);
+	}
+
 }
