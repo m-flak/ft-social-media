@@ -18,6 +18,8 @@ public interface TweetRepository extends JpaRepository<Tweet, Integer> {
 
     List<Tweet> findByInReplyToOrderByPostedAsc(Tweet inReplyTo);
 
+    List<Tweet> findByAuthor(User user);
+
     @Query("SELECT t FROM Tweet t WHERE t.isDeleted = 'false'")
     List<Tweet> findAllNotDeleted();
 
